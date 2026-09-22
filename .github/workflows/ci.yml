@@ -22,11 +22,12 @@ jobs:
       - name: Installation des dépendances
         run: npm ci
 
+      - name: Tests unitaires (Karma / ChromeHeadless)
+        run: npm test -- --watch=false --browsers=ChromeHeadless
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+
       # Le build production (AOT + optimisations + inlining des polices) est le
       # vrai gate de régression, identique à l'étape du Dockerfile.
-      #
-      # TODO: réactiver l'étape de tests quand les specs seront réparées —
-      #   npm test -- --watch=false --browsers=ChromeHeadless
-      # (34/42 échouaient au dernier état : NullInjectorError, providers manquants)
       - name: Build production (ng build)
         run: npm run build

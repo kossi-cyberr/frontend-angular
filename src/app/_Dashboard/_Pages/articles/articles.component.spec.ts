@@ -4,6 +4,9 @@ import { of } from 'rxjs';
 import { ArticlesComponent } from './articles.component';
 import { ArticleService } from 'src/app/services/article.service';
 import { Article } from 'src/app/Models/Article';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 describe('ArticlesComponent', () => {
   let component: ArticlesComponent;
@@ -28,7 +31,9 @@ describe('ArticlesComponent', () => {
         { provide: ArticleService, useValue: articleServiceSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: { queryParams: of({}) } }
-      ]
+      ],
+      imports: [HttpClientTestingModule, RouterTestingModule],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     fixture = TestBed.createComponent(ArticlesComponent);
