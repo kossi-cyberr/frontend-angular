@@ -95,9 +95,12 @@
         <div class="panel p-6" *ngIf="loading && !data">
           <app-squelette [lignes]="10"></app-squelette>
         </div>
-        <app-etat-erreur *ngIf="erreur" [message]="erreur" (reessayer)="charger()"></app-etat-erreur>
+        <app-etat-erreur *ngIf="erreur && !estVendeur" [message]="erreur" (reessayer)="charger()"></app-etat-erreur>
 
-        <div *ngIf="data" class="space-y-4">
+        <!-- Le vendeur ne doit jamais voir les données d'entreprise : le
+             contenu (KPI, stock, activité) n'est rendu que pour ADMIN/MANAGER -->
+
+        <div *ngIf="data && !estVendeur" class="space-y-4">
 
           <!-- ===== 1. Synthèse : les KPI qui comptent ===== -->
           <div class="grid grid-cols-2 gap-3 xl:grid-cols-4">
