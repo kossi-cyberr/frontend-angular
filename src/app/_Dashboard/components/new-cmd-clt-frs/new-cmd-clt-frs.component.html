@@ -19,6 +19,20 @@
               </option>
             </select>
           </div>
+          <!-- Création de client à la volée (commandes clients) -->
+          <div class="form-group row align-items-center" *ngIf="estClient">
+            <div class="col-md-7">
+              <input type="text" class="form-control form-control-sm" placeholder="Nouveau client — nom (et prénom)…"
+                     name="nouveauClientNom" [(ngModel)]="nouveauClientNom" autocomplete="off" />
+            </div>
+            <div class="col-md-5">
+              <button type="button" class="btn btn-outline-primary btn-sm btn-block"
+                      [disabled]="!nouveauClientNom.trim() || creationClient" (click)="creerClientVolee()">
+                <span class="spinner-border spinner-border-sm mr-1" *ngIf="creationClient"></span>
+                + Créer le client
+              </button>
+            </div>
+          </div>
         </form>
       </div>
       <div class="col-md-5 custom-border-right">

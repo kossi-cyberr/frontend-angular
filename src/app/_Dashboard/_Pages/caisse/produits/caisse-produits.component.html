@@ -1,0 +1,69 @@
+<div class="space-y-4">
+
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold">Produits</h1>
+      <p class="text-sm text-base-content/60">Consultation des prix et stocks — lecture seule.</p>
+    </div>
+  </div>
+
+  <div class="alert alert-error" *ngIf="errorMsg">
+    <span>{{ errorMsg }}</span>
+    <button type="button" class="btn btn-sm btn-ghost" (click)="charger()">Réessayer</button>
+  </div>
+
+  <p class="text-base-content/60" *ngIf="chargement">Chargement…</p>
+
+  <ng-container *ngIf="!chargement">
+
+    <!-- Filtres -->
+    <div class="flex flex-col gap-3 sm:flex-row">
+      <input type="text" class="input input-bordered w-full" placeholder="Rechercher (nom ou code)…"
+             [(ngModel)]="recherche" autocomplete="off" />
+      <select class="select select-bordered sm:w-56" [(ngModel)]="categorieChoisie">
+        <option value="">Toutes catégories</option>
+        <option *ngFor="let c of categoriesUtilisees" [ngValue]="c.id">{{ c.designation }}</option>
+      </select>
+      <select class="select select-bordered sm:w-44" [(ngModel)]="etatChoisi">
+        <option value="">Tous les états</option>
+        <option value="DISPO">Disponible</option>
+        <option value="BAS">Stock bas</option>
+        <option value="RUPTURE">Rupture</option>
+      </select>
+    </div>
+
+    <p class="py-10 text-center text-sm text-base-content/50" *ngIf="resultats.length === 0">
+      Aucun produit ne correspond à votre recherche.
+    </p>
+
+    <!-- Tableau -->
+    <div class="overflow-x-auto rounded-2xl border border-base-300 bg-base-100" *ngIf="resultats.length > 0">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Produit</th>
+            <th>Catégorie</th>
+            <th class="text-right">Prix</th>
+            <th class="text-center">Stock</th>
+            <th class="text-center">État</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of resultats">
+            <td>
+              <p class="font-medium">{{ a.designation }}</p>
+              <p class="font-mono text-[10px] text-base-content/50">{{ a.codeArticle }}</p>
+            </td>
+            <td>{{ a.category?.designation || '—' }}</td>
+            <td class="text-right font-semibold">{{ (a.prixUnitaireTTc ?? a.prixUnitaire ?? 0) | number:'1.0-0' }} FCFA</td>
+            <td class="text-center">{{ a.stockReel }}</td>
+            <td class="text-center">
+              <span class="badge badge-sm" [ngClass]="classeEtat(a)">{{ libelleEtat(a) }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </ng-container>
+</div>

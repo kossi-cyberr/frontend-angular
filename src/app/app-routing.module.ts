@@ -21,6 +21,10 @@ import { ChangerMotDepasseComponent } from './_Dashboard/_Pages/profile/changer-
 import { ApplicationGuard } from './auth/application.guard';
 import { PageVentesComponent } from './_Dashboard/_Pages/ventes/page-ventes/page-ventes.component';
 import { NewVenteComponent } from './_Dashboard/_Pages/ventes/new-vente/new-vente.component';
+import { CaisseDashboardComponent } from './_Dashboard/_Pages/caisse/caisse-dashboard/caisse-dashboard.component';
+import { CaisseNouvelleVenteComponent } from './_Dashboard/_Pages/caisse/nouvelle-vente/caisse-nouvelle-vente.component';
+import { CaisseProduitsComponent } from './_Dashboard/_Pages/caisse/produits/caisse-produits.component';
+import { CaisseMesVentesComponent } from './_Dashboard/_Pages/caisse/mes-ventes/caisse-mes-ventes.component';
 
 
 const routes: Routes = [
@@ -118,6 +122,12 @@ const routes: Routes = [
 
       { path: "ventes", component: PageVentesComponent },
       { path: "newvente", component: NewVenteComponent },
+
+      // ===== Espace vendeur / caisse (POS) =====
+      { path: "caisse", component: CaisseDashboardComponent },
+      { path: "caisse/nouvelle-vente", component: CaisseNouvelleVenteComponent },
+      { path: "caisse/produits", component: CaisseProduitsComponent },
+      { path: "caisse/mes-ventes", component: CaisseMesVentesComponent },
       { path: "utilisateur", component: UtilisateursComponent },
       { path: "newutilisateur", component: NewUtilisteurComponent },
       { path: "profile", component: ProfileComponent },

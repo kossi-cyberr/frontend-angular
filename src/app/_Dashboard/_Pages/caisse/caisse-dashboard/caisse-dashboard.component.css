@@ -1,0 +1,4 @@
+/* Le dashboard vendeur réutilise les utilitaires (DaisyUI + Tailwind) du projet. */
+:host {
+  display: block;
+}

@@ -1,0 +1,127 @@
+<div class="space-y-4">
+
+  <!-- Bandeaux d'état -->
+  <div class="alert alert-success" *ngIf="succesMsg && !ticketOuvert">
+    <span>{{ succesMsg }}</span>
+  </div>
+  <div class="alert alert-error" *ngIf="errorMsg">
+    <span>{{ errorMsg }}</span>
+  </div>
+
+  <p class="text-base-content/60" *ngIf="chargement">Chargement des produits…</p>
+
+  <ng-container *ngIf="!chargement">
+
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold">Nouvelle vente</h1>
+        <p class="text-sm text-base-content/60">
+          Rechercher → Ajouter au panier → Quantité → Valider
+          <span class="ml-2 hidden sm:inline">
+            <kbd class="kbd kbd-sm">F2</kbd> recherche ·
+            <kbd class="kbd kbd-sm">F4</kbd> valider
+          </span>
+        </p>
+      </div>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="retourCaisse()">← Retour</button>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-5">
+
+      <!-- ======= Catalogue ======= -->
+      <div class="xl:col-span-3">
+        <div class="mb-4 flex flex-col gap-3 sm:flex-row">
+          <input id="caisse-recherche" type="text" class="input input-bordered w-full"
+                 placeholder="Rechercher un produit (nom ou code)…"
+                 [(ngModel)]="recherche" autocomplete="off" />
+          <select class="select select-bordered sm:w-56" [(ngModel)]="categorieChoisie">
+            <option value="">Toutes catégories</option>
+            <option *ngFor="let c of categoriesUtilisees" [ngValue]="c.id">{{ c.designation }}</option>
+          </select>
+        </div>
+
+        <p class="py-10 text-center text-sm text-base-content/50" *ngIf="resultats.length === 0">
+          Aucun produit ne correspond à votre recherche.
+        </p>
+
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <button type="button"
+                  class="flex items-center justify-between gap-3 rounded-2xl border border-base-300 bg-base-100 p-4 text-left transition hover:border-primary disabled:opacity-50"
+                  *ngFor="let a of resultats"
+                  [disabled]="a.stockReel <= 0"
+                  (click)="ajouterAuPanier(a)">
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold">{{ a.designation }}</p>
+              <p class="font-mono text-[10px] text-base-content/50">{{ a.codeArticle }}</p>
+              <p class="mt-1 text-sm font-bold text-primary">{{ (a.prixUnitaireTTc ?? a.prixUnitaire ?? 0) | number:'1.0-0' }} FCFA</p>
+            </div>
+            <div class="shrink-0 text-right">
+              <span class="badge badge-sm" [ngClass]="etatStock(a).classe">{{ etatStock(a).libelle }}</span>
+              <p class="mt-1 text-[11px] text-base-content/60">Stock : {{ a.stockReel }}</p>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- ======= Panier ======= -->
+      <div class="xl:col-span-2">
+        <div class="sticky top-4 rounded-2xl border border-base-300 bg-base-100">
+          <div class="flex items-center justify-between border-b border-base-300 px-5 py-4">
+            <h2 class="font-semibold">Panier</h2>
+            <span class="badge badge-primary">{{ panier.length }}</span>
+          </div>
+
+          <p class="p-6 text-center text-xs text-base-content/50" *ngIf="panier.length === 0">
+            Panier vide — ajoutez des produits depuis le catalogue.
+          </p>
+
+          <div class="max-h-80 space-y-3 overflow-y-auto p-5" *ngIf="panier.length > 0">
+            <div class="rounded-xl border border-base-300 p-3" *ngFor="let item of panier">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-medium">{{ item.article.designation }}</p>
+                  <p class="text-xs text-base-content/60">{{ item.prixUnitaire | number:'1.0-0' }} FCFA · stock {{ item.article.stockReel }}</p>
+                </div>
+                <button type="button" class="btn btn-ghost btn-xs text-error" (click)="retirer(item)" aria-label="Retirer">✕</button>
+              </div>
+              <div class="mt-2 flex items-center justify-between">
+                <div class="flex items-center gap-1">
+                  <button type="button" class="btn btn-xs" (click)="changerQuantite(item, -1)">−</button>
+                  <input type="number" class="input input-xs w-14 text-center" [ngModel]="item.quantite"
+                         (ngModelChange)="item.quantite = $event" [min]="1" [max]="item.article.stockReel" />
+                  <button type="button" class="btn btn-xs" (click)="changerQuantite(item, 1)">+</button>
+                </div>
+                <span class="text-sm font-semibold">{{ item.quantite * item.prixUnitaire | number:'1.0-0' }} FCFA</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="border-t border-base-300 p-5" *ngIf="panier.length > 0">
+            <label class="mb-3 block">
+              <span class="mb-1 block text-xs font-medium text-base-content/70">Nom du client (optionnel)</span>
+              <input type="text" class="input input-bordered w-full" placeholder="Ex : passant, ticket à un nom…"
+                     [(ngModel)]="nomClient" autocomplete="off" />
+            </label>
+
+            <div class="mb-4 flex items-center justify-between text-lg font-bold">
+              <span>Total</span>
+              <span>{{ totalPanier | number:'1.0-0' }} FCFA</span>
+            </div>
+
+            <div class="flex gap-2">
+              <button type="button" class="btn btn-ghost flex-1" (click)="viderPanier()" [disabled]="enregistrement">Vider</button>
+              <button type="button" class="btn btn-primary flex-1" (click)="valider()" [disabled]="enregistrement || panier.length === 0">
+                <span class="loading loading-spinner loading-xs" *ngIf="enregistrement"></span>
+                Valider la vente
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>
+
+<!-- Ticket de la vente réussie -->
+<app-ticket [vente]="venteCreee" [visible]="ticketOuvert" titre="Ticket de vente"></app-ticket>

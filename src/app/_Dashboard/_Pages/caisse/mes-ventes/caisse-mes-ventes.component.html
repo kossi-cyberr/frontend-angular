@@ -1,0 +1,93 @@
+<div class="space-y-4">
+
+  <div>
+    <h1 class="text-2xl font-bold">Mes ventes</h1>
+    <p class="text-sm text-base-content/60">Vos ventes uniquement, avec détail et ticket imprimable.</p>
+  </div>
+
+  <div class="alert alert-error" *ngIf="errorMsg">
+    <span>{{ errorMsg }}</span>
+    <button type="button" class="btn btn-sm btn-ghost" (click)="charger()">Réessayer</button>
+  </div>
+
+  <p class="text-base-content/60" *ngIf="chargement">Chargement…</p>
+
+  <ng-container *ngIf="!chargement">
+
+    <p class="py-10 text-center text-sm text-base-content/50" *ngIf="ventes.length === 0">
+      Aucune vente enregistrée pour le moment.
+    </p>
+
+    <div class="space-y-3" *ngIf="ventes.length > 0">
+      <div class="rounded-2xl border border-base-300 bg-base-100" *ngFor="let vente of ventes">
+
+        <!-- Ligne résumé -->
+        <button type="button" class="flex w-full flex-wrap items-center gap-4 p-4 text-left"
+                (click)="deployer(vente)">
+          <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-success/15 text-success">
+            <i-lucide name="receipt" size="18"></i-lucide>
+          </span>
+          <span class="min-w-0 flex-1">
+            <span class="block truncate text-sm font-semibold">
+              <span class="font-mono text-primary">{{ vente.code }}</span>
+              <span class="text-base-content/60" *ngIf="vente.nomClient"> · {{ vente.nomClient }}</span>
+            </span>
+            <span class="block text-xs text-base-content/50">
+              {{ formaterDate(vente.dateVente) }} {{ formaterHeure(vente.dateVente) }} · {{ articles(vente) }} article{{ articles(vente) > 1 ? 's' : '' }}
+            </span>
+          </span>
+          <span class="shrink-0 font-bold">{{ total(vente) | number:'1.0-0' }} FCFA</span>
+          <i-lucide name="arrow-left-right" size="16" class="shrink-0 text-base-content/30"
+                    [class.rotate-90]="venteDeployee?.id === vente.id"></i-lucide>
+        </button>
+
+        <!-- Détail déployé -->
+        <div class="border-t border-base-300 p-4" *ngIf="venteDeployee?.id === vente.id">
+          <p class="mb-2 text-xs text-base-content/50" *ngIf="!vente.ligneVentes?.length">
+            Détail indisponible pour cette vente.
+          </p>
+          <div class="overflow-x-auto" *ngIf="vente.ligneVentes?.length">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Article</th>
+                  <th class="text-center">Quantité</th>
+                  <th class="text-right">P.U.</th>
+                  <th class="text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let ligne of vente.ligneVentes">
+                  <td>
+                    <span class="font-medium">{{ ligne.article?.designation }}</span>
+                    <span class="block font-mono text-[10px] text-base-content/50">{{ ligne.article?.codeArticle }}</span>
+                  </td>
+                  <td class="text-center">{{ ligne.quantite }}</td>
+                  <td class="text-right">{{ ligne.prixUnitaire | number:'1.0-0' }}</td>
+                  <td class="text-right">{{ (ligne.quantite ?? 0) * (ligne.prixUnitaire ?? 0) | number:'1.0-0' }} FCFA</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="mt-3 flex justify-end">
+            <button type="button" class="btn btn-outline btn-sm" (click)="ouvrirTicket(vente)">
+              <i-lucide name="receipt" size="14"></i-lucide>
+              Afficher / imprimer le ticket
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex items-center justify-between" *ngIf="(reponse?.totalPages ?? 0) > 1">
+      <button type="button" class="btn btn-sm" [disabled]="page === 0" (click)="allerPage(page - 1)">← Précédent</button>
+      <span class="text-xs text-base-content/60">Page {{ page + 1 }} / {{ reponse?.totalPages }}</span>
+      <button type="button" class="btn btn-sm" [disabled]="reponse?.last ?? false" (click)="allerPage(page + 1)">Suivant →</button>
+    </div>
+
+  </ng-container>
+</div>
+
+<app-ticket [vente]="venteTicket" [visible]="ticketOuvert" titre="Ticket de vente"></app-ticket>

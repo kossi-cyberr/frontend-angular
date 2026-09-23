@@ -35,6 +35,19 @@ export class DashboardComponent implements OnInit {
   ngOnInit(): void {
     this.utilisateur = this.userService.getConnectedUser();
     this.estVendeur = this.isVendeur();
+    if (this.estVendeur) {
+      // Le vendeur ne voit pas les données d'entreprise : redirection vers sa
+      // caisse uniquement s'il est à la racine (sinon on laisse la route
+      // enfant caisse s'afficher : /caisse/nouvelle-vente, produits…).
+      const url = this.router.url;
+      if (url === '/' || url === '') {
+        this.router.navigate(['/caisse']);
+        return;
+      }
+      if (url.startsWith('/caisse')) {
+        return; // contenu vendeur affiché par le composant enfant
+      }
+    }
     this.charger();
   }
 

@@ -1,0 +1,156 @@
+.ticket-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 1rem;
+}
+
+.ticket-zone {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 95vh;
+}
+
+.ticket-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.ticket-papier {
+  width: 340px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #fff;
+  color: #111827;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ticket-titre {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ticket-code {
+  margin: 0.35rem 0 0;
+  text-align: center;
+  font-family: monospace;
+  font-weight: 700;
+}
+
+.ticket-date {
+  margin: 0.15rem 0 0;
+  text-align: center;
+  color: #6b7280;
+  font-size: 11px;
+}
+
+.ticket-separateur {
+  border-top: 1px dashed #d1d5db;
+  margin: 0.75rem 0;
+}
+
+.ticket-champs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.ticket-champ {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.ticket-champ span {
+  color: #6b7280;
+}
+
+.ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ticket-table th {
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.3rem;
+}
+
+.ticket-table td {
+  padding: 0.35rem 0;
+  vertical-align: top;
+}
+
+.ticket-article {
+  display: block;
+  font-weight: 600;
+}
+
+.ticket-code-article {
+  display: block;
+  font-family: monospace;
+  font-size: 10px;
+  color: #6b7280;
+}
+
+.ticket-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.ticket-total strong {
+  font-size: 16px;
+}
+
+.ticket-merci {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  color: #6b7280;
+  font-size: 11px;
+}
+
+/* Impression : seule la zone ticket est imprimée. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .ticket-overlay,
+  .ticket-overlay * {
+    visibility: visible;
+  }
+  .ticket-overlay {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    padding: 0;
+  }
+  .ticket-zone {
+    max-height: none;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .ticket-papier {
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+    border-radius: 0;
+  }
+}

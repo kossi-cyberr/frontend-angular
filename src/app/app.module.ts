@@ -42,6 +42,11 @@ import { SidebarComponent } from './_Dashboard/components/sidebar/sidebar.compon
 import { DataTableComponent } from './_Dashboard/components/data-table/data-table.component';
 import { ConfirmDialogComponent } from './_Dashboard/components/confirm-dialog/confirm-dialog.component';
 import { PageVentesComponent } from './_Dashboard/_Pages/ventes/page-ventes/page-ventes.component';
+import { CaisseDashboardComponent } from './_Dashboard/_Pages/caisse/caisse-dashboard/caisse-dashboard.component';
+import { CaisseNouvelleVenteComponent } from './_Dashboard/_Pages/caisse/nouvelle-vente/caisse-nouvelle-vente.component';
+import { CaisseProduitsComponent } from './_Dashboard/_Pages/caisse/produits/caisse-produits.component';
+import { CaisseMesVentesComponent } from './_Dashboard/_Pages/caisse/mes-ventes/caisse-mes-ventes.component';
+import { TicketComponent } from './_Dashboard/components/ticket/ticket.component';
 import { NewVenteComponent } from './_Dashboard/_Pages/ventes/new-vente/new-vente.component';
 import {
   LucideAngularModule,
@@ -100,7 +105,12 @@ import {
     DataTableComponent,
     ConfirmDialogComponent,
     PageVentesComponent,
-    NewVenteComponent
+    NewVenteComponent,
+    CaisseDashboardComponent,
+    CaisseNouvelleVenteComponent,
+    CaisseProduitsComponent,
+    CaisseMesVentesComponent,
+    TicketComponent
   ],
   imports: [
     BrowserModule,
