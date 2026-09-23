@@ -1,0 +1,151 @@
+<div class="space-y-4">
+
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <h1 class="page-title mb-0">Stock</h1>
+      <p class="page-subtitle mb-0">Vue d'ensemble : disponibles, stocks faibles, ruptures et mouvements.</p>
+    </div>
+    <button type="button" class="btn btn-outline btn-sm" (click)="charger()">
+      <i-lucide name="refresh-cw" size="14"></i-lucide>
+      Actualiser
+    </button>
+  </div>
+
+  <app-etat-erreur *ngIf="errorMsg" [message]="errorMsg" (reessayer)="charger()"></app-etat-erreur>
+  <div class="panel p-4" *ngIf="chargement">
+    <app-squelette [lignes]="8"></app-squelette>
+  </div>
+
+  <ng-container *ngIf="!chargement && !errorMsg">
+
+    <!-- Synthèse -->
+    <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div class="panel p-4">
+        <p class="data-label mb-1">Disponibles</p>
+        <p class="kpi-valeur mb-0 text-success">{{ totals.ok }}</p>
+      </div>
+      <div class="panel p-4">
+        <p class="data-label mb-1">Stock faible</p>
+        <p class="kpi-valeur mb-0 text-warning">{{ totals.bas }}</p>
+      </div>
+      <div class="panel p-4">
+        <p class="data-label mb-1">Ruptures</p>
+        <p class="kpi-valeur mb-0 text-error">{{ totals.rupture }}</p>
+      </div>
+      <div class="panel p-4">
+        <p class="data-label mb-1">Valeur estimée (prix d'achat)</p>
+        <p class="kpi-valeur mb-0">{{ totals.valeurEstimee | number:'1.0-0' }} F</p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 xl:grid-cols-3">
+
+      <!-- État du stock par article -->
+      <div class="panel xl:col-span-2">
+        <div class="panel-header">
+          <h2 class="panel-title mb-0">État du stock par article</h2>
+          <span class="text-xs text-base-content/50">{{ resultats.length }} article(s)</span>
+        </div>
+
+        <div class="flex flex-col gap-2 border-b border-base-300 p-3 sm:flex-row">
+          <input type="text" class="input input-bordered input-sm w-full" placeholder="Rechercher (nom ou code)…"
+                 [(ngModel)]="recherche" autocomplete="off" />
+          <select class="select select-bordered select-sm sm:w-44" [(ngModel)]="filtreEtat">
+            <option value="">Tous les états</option>
+            <option value="ok">🟢 Stock normal</option>
+            <option value="bas">🟠 Stock faible</option>
+            <option value="rupture">🔴 Rupture</option>
+          </select>
+        </div>
+
+        <app-etat-vide *ngIf="resultats.length === 0" icone="boxes"
+                       message="Aucun article ne correspond" detail="Modifiez la recherche ou les filtres.">
+        </app-etat-vide>
+
+        <div class="overflow-x-auto" *ngIf="resultats.length > 0">
+          <table class="table table-sm table-stockhub">
+            <thead>
+              <tr>
+                <th>Article</th>
+                <th class="text-right">Stock</th>
+                <th class="text-right">Seuil</th>
+                <th class="text-center">État</th>
+                <th class="w-px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let ligne of resultats">
+                <tr class="cursor-pointer" (click)="basculerHistorique(ligne)">
+                  <td>
+                    <p class="mb-0 font-medium">{{ ligne.article.designation }}</p>
+                    <p class="mb-0 font-mono text-[10px] text-base-content/50">{{ ligne.article.codeArticle }}</p>
+                  </td>
+                  <td class="text-right font-semibold">{{ ligne.stock }}</td>
+                  <td class="text-right text-base-content/60">{{ ligne.seuil }}</td>
+                  <td class="text-center">
+                    <app-badge-statut [etat]="ligne.etat"></app-badge-statut>
+                  </td>
+                  <td>
+                    <i-lucide name="chevron-down" size="16" class="text-base-content/40"
+                              [class.rotate-180]="articleHistorique === ligne.article.id"></i-lucide>
+                  </td>
+                </tr>
+                <!-- Historique déployé -->
+                <tr *ngIf="articleHistorique === ligne.article.id">
+                  <td colspan="5" class="bg-base-200/50">
+                    <p class="data-label mb-2">Historique des mouvements</p>
+                    <p class="mb-0 text-xs text-base-content/50" *ngIf="historiqueChargement">Chargement…</p>
+                    <p class="mb-0 text-xs text-base-content/50" *ngIf="!historiqueChargement && historiqueMvts.length === 0">
+                      Aucun mouvement enregistré.
+                    </p>
+                    <div class="max-h-56 space-y-1 overflow-y-auto" *ngIf="!historiqueChargement && historiqueMvts.length > 0">
+                      <div class="flex items-center justify-between gap-3 rounded-md bg-base-100 px-3 py-1.5 text-xs"
+                           *ngFor="let m of historiqueMvts">
+                        <span class="shrink-0 text-base-content/50">{{ m.date | date:'dd/MM HH:mm' }}</span>
+                        <span class="min-w-0 flex-1 truncate">{{ m.source }}</span>
+                        <span class="shrink-0 font-semibold"
+                              [class.text-success]="m.quantite > 0" [class.text-error]="m.quantite < 0">
+                          {{ m.quantite > 0 ? '+' : '' }}{{ m.quantite }}
+                        </span>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Mouvements récents -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title mb-0">Derniers mouvements</h2>
+          <a routerLink="/mvtstk" class="text-xs font-medium text-primary hover:underline">Tout voir</a>
+        </div>
+        <div class="space-y-2 p-4">
+          <p class="mb-0 py-6 text-center text-xs text-base-content/50" *ngIf="mouvements.length === 0">
+            Aucun mouvement enregistré.
+          </p>
+          <div class="flex items-center gap-3 rounded-md border border-base-300 px-3 py-2"
+               *ngFor="let m of mouvements">
+            <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+                  [ngClass]="m.quantite > 0 ? 'bg-success/10 text-success' : 'bg-error/10 text-error'">
+              {{ m.quantite > 0 ? '+' : '' }}{{ m.quantite }}
+            </span>
+            <span class="min-w-0 flex-1">
+              <span class="block truncate text-sm font-medium">{{ m.article }}</span>
+              <span class="block text-[11px] text-base-content/50">
+                {{ m.date | date:'dd/MM/yyyy HH:mm' }} · {{ m.source }}
+              </span>
+            </span>
+          </div>
+          <button type="button" class="btn btn-outline btn-sm w-full" routerLink="/mvtstk">
+            Voir tous les mouvements
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>

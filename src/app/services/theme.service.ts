@@ -8,16 +8,16 @@ import { Injectable } from '@angular/core';
  */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  private static readonly STORAGE_KEY = 'clinic-theme';
-  private static readonly LIGHT = 'clinic-light';
-  private static readonly DARK = 'clinic-dark';
+  private static readonly STORAGE_KEY = 'stockhub-theme';
+  private static readonly LIGHT = 'stockhub-light';
+  private static readonly DARK = 'stockhub-dark';
 
-  private courant: 'clinic-light' | 'clinic-dark';
+  private courant: 'stockhub-light' | 'stockhub-dark';
 
   constructor() {
-    // Priorité : paramètre d'URL (?theme=clinic-dark) > choix sauvegardé > préférence système
+    // Priorité : paramètre d'URL (?theme=stockhub-dark) > choix sauvegardé > préférence système
     const parametreUrl = new URLSearchParams(window.location.search).get('theme');
-    const sauvegarde = localStorage.getItem(ThemeService.STORAGE_KEY) as 'clinic-light' | 'clinic-dark' | null;
+    const sauvegarde = localStorage.getItem(ThemeService.STORAGE_KEY) as 'stockhub-light' | 'stockhub-dark' | null;
     const systemeSombre = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
     this.courant = parametreUrl === ThemeService.DARK || parametreUrl === ThemeService.LIGHT
       ? parametreUrl
@@ -25,7 +25,7 @@ export class ThemeService {
     this.appliquer();
   }
 
-  get theme(): 'clinic-light' | 'clinic-dark' {
+  get theme(): 'stockhub-light' | 'stockhub-dark' {
     return this.courant;
   }
 

@@ -47,6 +47,14 @@ import { CaisseNouvelleVenteComponent } from './_Dashboard/_Pages/caisse/nouvell
 import { CaisseProduitsComponent } from './_Dashboard/_Pages/caisse/produits/caisse-produits.component';
 import { CaisseMesVentesComponent } from './_Dashboard/_Pages/caisse/mes-ventes/caisse-mes-ventes.component';
 import { TicketComponent } from './_Dashboard/components/ticket/ticket.component';
+import { PageHeaderComponent } from './_Dashboard/components/ui/page-header/page-header.component';
+import { BadgeStatutComponent } from './_Dashboard/components/ui/badge-statut/badge-statut.component';
+import { ToastContainerComponent } from './_Dashboard/components/ui/toast/toast-container.component';
+import { EtatVideComponent } from './_Dashboard/components/ui/etat-vide/etat-vide.component';
+import { EtatErreurComponent } from './_Dashboard/components/ui/etat-erreur/etat-erreur.component';
+import { SqueletteComponent } from './_Dashboard/components/ui/squelette/squelette.component';
+import { StockComponent } from './_Dashboard/_Pages/stock/stock.component';
+import { ExportsComponent } from './_Dashboard/_Pages/exports/exports.component';
 import { NewVenteComponent } from './_Dashboard/_Pages/ventes/new-vente/new-vente.component';
 import {
   LucideAngularModule,
@@ -60,6 +68,19 @@ import {
   Building2,
   Tags,
   UserCog,
+  Search,
+  ChevronDown,
+  ChevronUp,
+  ChevronsUpDown,
+  RefreshCw,
+  AlertTriangle,
+  CheckCircle2,
+  Info,
+  Inbox,
+  Loader2,
+  FileDown,
+  FileSpreadsheet,
+  FileText,
   Boxes,
   Sun,
   Moon,
@@ -110,7 +131,15 @@ import {
     CaisseNouvelleVenteComponent,
     CaisseProduitsComponent,
     CaisseMesVentesComponent,
-    TicketComponent
+    TicketComponent,
+    PageHeaderComponent,
+    BadgeStatutComponent,
+    ToastContainerComponent,
+    EtatVideComponent,
+    EtatErreurComponent,
+    SqueletteComponent,
+    StockComponent,
+    ExportsComponent
   ],
   imports: [
     BrowserModule,
@@ -138,7 +167,20 @@ import {
       LogOut,
       Menu,
       X,
-      Receipt
+      Receipt,
+      Search,
+      ChevronDown,
+      ChevronUp,
+      ChevronsUpDown,
+      RefreshCw,
+      AlertTriangle,
+      CheckCircle2,
+      Info,
+      Inbox,
+      Loader2,
+      FileDown,
+      FileSpreadsheet,
+      FileText
     })
   ],
   providers: [{

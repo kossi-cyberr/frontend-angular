@@ -2,28 +2,45 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ------------------------------------------------------------------ */
-/* Base — typographie et surface                                       */
-/* ------------------------------------------------------------------ */
+/* ================================================================== */
+/* DESIGN SYSTEM STOCK-HUB                                            */
+/* Sobre, dense, orienté productivité. Aucune décoration gratuite.    */
+/* ================================================================== */
+
 html {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 body {
   @apply bg-base-200 text-base-content font-sans antialiased;
 }
 
-/* Hiérarchie typographique commune à toutes les pages */
+/* ------------------------------------------------------------------ */
+/* Typographie : hiérarchie unique dans toute l'application            */
+/* ------------------------------------------------------------------ */
+
 .page-title {
-  @apply text-xl sm:text-2xl font-bold tracking-tight text-base-content;
+  @apply text-xl font-bold tracking-tight text-base-content;
+}
+
+.page-subtitle {
+  @apply text-sm text-base-content/60;
 }
 
 .section-title {
-  @apply text-base font-semibold text-base-content;
+  @apply text-sm font-semibold uppercase tracking-wide text-base-content/70;
 }
 
 .helper-text {
   @apply text-sm text-base-content/60;
+}
+
+.data-label {
+  @apply text-[11px] font-medium uppercase tracking-wide text-base-content/50;
+}
+
+.data-value {
+  @apply text-sm font-medium text-base-content;
 }
 
 /* Focus clavier visible et cohérent */
@@ -36,11 +53,41 @@ textarea:focus-visible {
 }
 
 /* ------------------------------------------------------------------ */
-/* Remap des classes legacy (les templates existants continuent de     */
-/* fonctionner, mais suivent désormais le thème Light/Dark)            */
+/* Surfaces : cartes « panneau » sobres, bordure fine, ombre douce     */
 /* ------------------------------------------------------------------ */
+
+.panel {
+  @apply rounded-lg border border-base-300 bg-base-100 shadow-sh-panel;
+}
+
+.panel-header {
+  @apply flex items-center justify-between gap-3 border-b border-base-300 px-4 py-3;
+}
+
+.panel-title {
+  @apply text-sm font-semibold text-base-content;
+}
+
+.panel-body {
+  @apply p-4;
+}
+
+/* Surfaces legacy (templates existants) remappées sur le DS */
+.card {
+  @apply rounded-lg border border-base-300;
+}
+
+.custom-border,
+.custom-border-right {
+  @apply border border-base-300 rounded-md;
+}
+
 .backgroung-grey {
   @apply bg-base-200;
+}
+
+.border-right {
+  @apply border-r border-base-300;
 }
 
 .border-none {
@@ -51,18 +98,6 @@ textarea:focus-visible {
   min-height: 80px;
 }
 
-.border-right {
-  @apply border-r border-base-300;
-}
-
-.custom-border-right {
-  @apply border border-base-300 rounded-md;
-}
-
-.custom-border {
-  @apply border border-base-300 rounded-md;
-}
-
 .blue-color {
   @apply text-primary;
 }
@@ -71,7 +106,59 @@ textarea:focus-visible {
   display: none;
 }
 
-/* Loader linéaire (re-coloré avec le primary du thème) */
+/* ------------------------------------------------------------------ */
+/* Badges métier STOCK-HUB : statuts de stock et de workflow           */
+/* ------------------------------------------------------------------ */
+
+.badge-stock-ok {
+  @apply inline-flex items-center gap-1 rounded-full bg-success/10 px-2.5 py-0.5 text-xs font-medium text-success;
+}
+
+.badge-stock-bas {
+  @apply inline-flex items-center gap-1 rounded-full bg-warning/10 px-2.5 py-0.5 text-xs font-medium text-warning;
+}
+
+.badge-stock-rupture {
+  @apply inline-flex items-center gap-1 rounded-full bg-error/10 px-2.5 py-0.5 text-xs font-medium text-error;
+}
+
+.badge-statut {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+}
+
+/* Puces de statut utilisées dans tableaux et détails */
+.puce-statut {
+  @apply inline-block h-2 w-2 rounded-full;
+}
+
+/* ------------------------------------------------------------------ */
+/* Tableaux denses et lisibles                                         */
+/* ------------------------------------------------------------------ */
+
+.table-stockhub thead th {
+  @apply bg-base-200 text-[11px] font-semibold uppercase tracking-wide text-base-content/60;
+}
+
+.table-stockhub tbody tr {
+  @apply border-b border-base-300 last:border-b-0;
+}
+
+.table-stockhub tbody tr:hover {
+  @apply bg-base-200/60;
+}
+
+/* ------------------------------------------------------------------ */
+/* KPI (dashboard) : chiffre + libellé, sans décoration                */
+/* ------------------------------------------------------------------ */
+
+.kpi-valeur {
+  @apply text-2xl font-bold tracking-tight text-base-content;
+}
+
+/* ------------------------------------------------------------------ */
+/* Loader linéaire legacy (re-coloré primaire)                         */
+/* ------------------------------------------------------------------ */
+
 .loader-overlay {
   position: absolute;
   width: 100%;
@@ -99,25 +186,12 @@ textarea:focus-visible {
 }
 
 @keyframes loading {
-  from {
-    left: -200px;
-    width: 30%;
-  }
-  50% {
-    width: 30%;
-  }
-  70% {
-    width: 70%;
-  }
-  80% {
-    left: 50%;
-  }
-  95% {
-    left: 120%;
-  }
-  to {
-    left: 100%;
-  }
+  from { left: -200px; width: 30%; }
+  50% { width: 30%; }
+  70% { width: 70%; }
+  80% { left: 50%; }
+  95% { left: 120%; }
+  to { left: 100%; }
 }
 
 #posts {

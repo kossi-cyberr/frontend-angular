@@ -1,9 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router, NavigationEnd, Event as RouterEvent } from '@angular/router';
 import { filter, takeUntil } from 'rxjs/operators';
-import { Subject } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
 import { LanguageService } from 'src/app/services/language.service';
-import { UserService } from 'src/app/services/user.service';
+import { RoleService } from 'src/app/services/role.service';
+import { ArticleService } from 'src/app/services/article.service';
+import { MvtStkService } from 'src/app/services/mvt-stk.service';
+import { Article } from 'src/app/Models/Article';
 
 interface ItemMenu {
   id: string;
@@ -12,6 +15,8 @@ interface ItemMenu {
   url: string;
   /** Nom Lucide de l'icône (kebab-case, fournie via LucideAngularModule.pick). */
   icone: string;
+  /** Badge numérique (alertes stock sur l'item Stock). */
+  badge?: number;
 }
 
 interface SectionMenu {
@@ -21,9 +26,10 @@ interface SectionMenu {
 }
 
 /**
- * Sidebar de navigation professionnelle.
- * Sections stables (Pilotage / Gestion / Système), route active mise en évidence,
- * profil utilisateur + déconnexion gérés par le composant hôte (dashboard).
+ * Sidebar STOCK-HUB : navigation par catégories métier, adaptée au rôle.
+ * ADMIN   → Pilotage, Ventes, Achats, Catalogue, Stock, Gestion, Rapports
+ * MANAGER → idem sans la gestion des utilisateurs
+ * VENDEUR → Accueil, Vente, Produits, Profil
  */
 @Component({
   selector: 'app-sidebar',
@@ -32,6 +38,9 @@ interface SectionMenu {
 })
 export class SidebarComponent implements OnInit, OnDestroy {
   private detruit$ = new Subject<void>();
+
+  /** Nombre d'articles sous le seuil (badge sur la section Stock). */
+  alertesStock = 0;
 
   sections: SectionMenu[] = [
     {
@@ -43,34 +52,74 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ]
     },
     {
-      id: 'caisse',
-      cle: 'section.caisse',
+      id: 'ventes',
+      cle: 'section.ventes',
       items: [
-        { id: 'caisse-home', cle: 'nav.caisse', url: 'caisse', icone: 'shopping-cart' },
-        { id: 'caisse-nouvelle', cle: 'nav.nouvelleVente', url: 'caisse/nouvelle-vente', icone: 'receipt' },
-        { id: 'caisse-produits', cle: 'nav.produits', url: 'caisse/produits', icone: 'package' },
-        { id: 'caisse-ventes', cle: 'nav.mesVentes', url: 'caisse/mes-ventes', icone: 'receipt' }
+        { id: 'ventes', cle: 'nav.ventes', url: 'ventes', icone: 'receipt' },
+        { id: 'cmd-clients', cle: 'nav.cmdClients', url: 'commandeclient', icone: 'shopping-cart' }
+      ]
+    },
+    {
+      id: 'achats',
+      cle: 'section.achats',
+      items: [
+        { id: 'cmd-fournisseurs', cle: 'nav.cmdFournisseurs', url: 'commandefournissuer', icone: 'building-2' },
+        { id: 'fournisseurs', cle: 'nav.fournisseurs', url: 'fournisseurs', icone: 'truck' }
+      ]
+    },
+    {
+      id: 'catalogue',
+      cle: 'section.catalogue',
+      items: [
+        { id: 'articles', cle: 'nav.articles', url: 'articles', icone: 'package' },
+        { id: 'categories', cle: 'nav.categories', url: 'categories', icone: 'tags' }
+      ]
+    },
+    {
+      id: 'stock',
+      cle: 'section.stock',
+      items: [
+        { id: 'stock', cle: 'nav.stock', url: 'stock', icone: 'boxes' },
+        { id: 'mvtstk', cle: 'nav.mvtstk', url: 'mvtstk', icone: 'arrow-left-right' }
       ]
     },
     {
       id: 'gestion',
       cle: 'section.gestion',
       items: [
-        { id: 'articles', cle: 'nav.articles', url: 'articles', icone: 'package' },
-        { id: 'mvtstk', cle: 'nav.mvtstk', url: 'mvtstk', icone: 'arrow-left-right' },
         { id: 'clients', cle: 'nav.clients', url: 'client', icone: 'users' },
-        { id: 'cmd-clients', cle: 'nav.cmdClients', url: 'commandeclient', icone: 'shopping-cart' },
-        { id: 'fournisseurs', cle: 'nav.fournisseurs', url: 'fournisseurs', icone: 'truck' },
-        { id: 'cmd-fournisseurs', cle: 'nav.cmdFournisseurs', url: 'commandefournissuer', icone: 'building-2' },
-        { id: 'ventes', cle: 'nav.ventes', url: 'ventes', icone: 'receipt' }
+        { id: 'utilisateurs', cle: 'nav.utilisateurs', url: 'utilisateur', icone: 'user-cog' }
       ]
     },
     {
-      id: 'systeme',
-      cle: 'section.systeme',
+      id: 'rapports',
+      cle: 'section.rapports',
       items: [
-        { id: 'categories', cle: 'nav.categories', url: 'categories', icone: 'tags' },
-        { id: 'utilisateurs', cle: 'nav.utilisateurs', url: 'utilisateur', icone: 'user-cog' }
+        { id: 'exports', cle: 'nav.exports', url: 'exports', icone: 'file-down' }
+      ]
+    },
+    // ================= VENDEUR =================
+    {
+      id: 'accueil',
+      cle: 'section.accueil',
+      items: [
+        { id: 'caisse-home', cle: 'nav.caisse', url: 'caisse', icone: 'layout-dashboard' }
+      ]
+    },
+    {
+      id: 'vente',
+      cle: 'section.vente',
+      items: [
+        { id: 'caisse-nouvelle', cle: 'nav.nouvelleVente', url: 'caisse/nouvelle-vente', icone: 'shopping-cart' },
+        { id: 'caisse-ventes', cle: 'nav.mesVentes', url: 'caisse/mes-ventes', icone: 'receipt' }
+      ]
+    },
+    {
+      id: 'produits',
+      cle: 'section.produits',
+      items: [
+        { id: 'caisse-produits', cle: 'nav.produits', url: 'caisse/produits', icone: 'package' },
+        { id: 'caisse-stock', cle: 'nav.stock', url: 'stock', icone: 'boxes' }
       ]
     }
   ];
@@ -78,17 +127,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
   /** Route courante (pour l'état actif des liens). */
   urlCourante = '';
 
-  /** Vrai si l'utilisateur connecté est un simple vendeur. */
-  estVendeur = false;
-
   constructor(
     private router: Router,
     public langueService: LanguageService,
-    private userService: UserService
+    public roleService: RoleService,
+    private articleService: ArticleService,
+    private mvtStkService: MvtStkService
   ) {}
 
   ngOnInit(): void {
-    this.estVendeur = this.isVendeur();
     this.urlCourante = this.router.url;
     this.router.events
       .pipe(
@@ -98,11 +145,37 @@ export class SidebarComponent implements OnInit, OnDestroy {
       .subscribe((e: RouterEvent) => {
         this.urlCourante = (e as NavigationEnd).urlAfterRedirects;
       });
+
+    if (this.roleService.peutPiloter) {
+      this.chargerAlertesStock();
+    }
   }
 
   ngOnDestroy(): void {
     this.detruit$.next();
     this.detruit$.complete();
+  }
+
+  /** Compte les articles sous le seuil (stock réel via mouvements). */
+  private chargerAlertesStock(): void {
+    forkJoin({
+      articles: this.articleService.getAllArticles(),
+      mvts: this.mvtStkService.findAll()
+    })
+      .pipe(takeUntil(this.detruit$))
+      .subscribe(({ articles, mvts }) => {
+        const stocks = new Map<number, number>();
+        for (const mvt of mvts) {
+          const id = mvt.article?.id;
+          if (id !== undefined) {
+            stocks.set(id, (stocks.get(id) ?? 0) + Number(mvt.quantite ?? 0));
+          }
+        }
+        this.alertesStock = (articles as Article[]).filter(a => {
+          const stock = stocks.get(a.id ?? -1) ?? 0;
+          return stock <= (a.seuilAlerte ?? 0);
+        }).length;
+      });
   }
 
   /** Vrai si l'item correspond à la route active. */
@@ -123,38 +196,23 @@ export class SidebarComponent implements OnInit, OnDestroy {
     return this.langueService.t(cle);
   }
 
-  /** Vérifie si l'utilisateur connecté a le rôle VENDEUR uniquement. */
-  private isVendeur(): boolean {
-    const user = this.userService.getConnectedUser();
-    const roles = user?.roles ?? [];
-    return roles.length === 1 && roles[0]?.rolename === 'VENDEUR';
-  }
-
-  /** Retourne les sections visibles selon le rôle. */
+  /** Retourne les sections visibles selon le rôle connecté. */
   get sectionsVisibles(): SectionMenu[] {
-    if (!this.estVendeur) {
-      return this.sections;
+    if (this.roleService.estVendeur) {
+      // Vendeur : Accueil, Vente, Produits (avec stock, sans gestion)
+      return this.sections
+        .filter(s => ['accueil', 'vente', 'produits'].includes(s.id));
     }
-    return this.sections
-      .map(section => {
-        if (section.id === 'pilotage') {
-          // Vendeur : pas de statistiques d'entreprise
-          return {
-            ...section,
-            items: section.items.filter(item => item.id !== 'stats')
-          };
-        }
-        if (section.id === 'gestion') {
-          // Vendeur : pas des fournisseurs ni des commandes fournisseurs
-          return {
-            ...section,
-            items: section.items.filter(item =>
-              item.id !== 'fournisseurs' && item.id !== 'cmd-fournisseurs'
-            )
-          };
-        }
-        return section;
-      })
-      .filter(section => section.items.length > 0);
+    const sections = this.sections.filter(s =>
+      !['accueil', 'vente', 'produits'].includes(s.id));
+    if (this.roleService.peutAdministrer) {
+      return sections;
+    }
+    // MANAGER : tout sauf la gestion des utilisateurs
+    return sections
+      .map(s => s.id === 'gestion'
+        ? { ...s, items: s.items.filter(i => i.id !== 'utilisateurs') }
+        : s)
+      .filter(s => s.items.length > 0);
   }
 }

@@ -11,7 +11,13 @@
            (click)="naviguer(item)"
            [attr.aria-current]="estActif(item) ? 'page' : null">
           <i-lucide [name]="item.icone" size="18" class="sidebar-icone"></i-lucide>
-          <span>{{ t(item.cle) }}</span>
+          <span class="min-w-0 flex-1">{{ t(item.cle) }}</span>
+          <!-- Badge alertes stock (item Stock des rôles de pilotage) -->
+          <span *ngIf="item.id === 'stock' && alertesStock > 0"
+                class="badge badge-error badge-sm shrink-0 px-1.5 font-semibold"
+                [title]="alertesStock + ' produit(s) sous le seuil'">
+            {{ alertesStock }}
+          </span>
         </a>
       </li>
     </ul>

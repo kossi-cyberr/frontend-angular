@@ -1,0 +1,14 @@
+<div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+  <div class="min-w-0">
+    <h1 class="page-title mb-0">{{ titre }}</h1>
+    <p class="page-subtitle mb-0" *ngIf="sousTitre">{{ sousTitre }}</p>
+  </div>
+  <div class="flex shrink-0 items-center gap-2">
+    <ng-content select="[actionsSecondaires]"></ng-content>
+    <button type="button" class="btn btn-primary btn-sm" *ngIf="actionLibelle" (click)="actionClick()">
+      <i-lucide [name]="actionIcone" size="16"></i-lucide>
+      {{ actionLibelle }}
+    </button>
+    <ng-content></ng-content>
+  </div>
+</div>

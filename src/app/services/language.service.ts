@@ -14,11 +14,21 @@ const DICO: Record<Langue, Record<string, string>> = {
     'app.logout': 'Déconnexion',
     'section.pilotage': 'Pilotage',
     'section.caisse': 'Caisse',
+    'section.ventes': 'Ventes',
+    'section.achats': 'Achats',
+    'section.catalogue': 'Catalogue',
+    'section.stock': 'Stock',
+    'section.rapports': 'Rapports',
+    'section.accueil': 'Accueil',
+    'section.vente': 'Vente',
+    'section.produits': 'Produits',
     'section.gestion': 'Gestion',
     'section.systeme': 'Système',
-    'nav.caisse': 'Espace vendeur',
+    'nav.stock': 'Stock',
+    'nav.exports': 'Exports',
+    'nav.caisse': 'Tableau de bord',
     'nav.nouvelleVente': 'Nouvelle vente',
-    'nav.produits': 'Produits (lecture)',
+    'nav.produits': 'Produits',
     'nav.mesVentes': 'Mes ventes',
     'nav.dashboard': 'Tableau de bord',
     'nav.stats': 'Statistiques',
@@ -52,11 +62,21 @@ const DICO: Record<Langue, Record<string, string>> = {
     'app.logout': 'Sign out',
     'section.pilotage': 'Overview',
     'section.caisse': 'Checkout',
+    'section.ventes': 'Sales',
+    'section.achats': 'Purchasing',
+    'section.catalogue': 'Catalog',
+    'section.stock': 'Inventory',
+    'section.rapports': 'Reports',
+    'section.accueil': 'Home',
+    'section.vente': 'Sales',
+    'section.produits': 'Products',
     'section.gestion': 'Management',
     'section.systeme': 'System',
-    'nav.caisse': 'Sales area',
+    'nav.stock': 'Inventory',
+    'nav.exports': 'Exports',
+    'nav.caisse': 'Dashboard',
     'nav.nouvelleVente': 'New sale',
-    'nav.produits': 'Products (read-only)',
+    'nav.produits': 'Products',
     'nav.mesVentes': 'My sales',
     'nav.dashboard': 'Dashboard',
     'nav.stats': 'Statistics',
@@ -92,7 +112,7 @@ const DICO: Record<Langue, Record<string, string>> = {
  */
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
-  private static readonly STORAGE_KEY = 'clinic-lang';
+  private static readonly STORAGE_KEY = 'stockhub-lang';
 
   private courant: Langue;
   private sujet = new BehaviorSubject<Langue>('fr');

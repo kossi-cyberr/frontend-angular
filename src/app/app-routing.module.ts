@@ -25,6 +25,8 @@ import { CaisseDashboardComponent } from './_Dashboard/_Pages/caisse/caisse-dash
 import { CaisseNouvelleVenteComponent } from './_Dashboard/_Pages/caisse/nouvelle-vente/caisse-nouvelle-vente.component';
 import { CaisseProduitsComponent } from './_Dashboard/_Pages/caisse/produits/caisse-produits.component';
 import { CaisseMesVentesComponent } from './_Dashboard/_Pages/caisse/mes-ventes/caisse-mes-ventes.component';
+import { StockComponent } from './_Dashboard/_Pages/stock/stock.component';
+import { ExportsComponent } from './_Dashboard/_Pages/exports/exports.component';
 
 
 const routes: Routes = [
@@ -128,6 +130,12 @@ const routes: Routes = [
       { path: "caisse/nouvelle-vente", component: CaisseNouvelleVenteComponent },
       { path: "caisse/produits", component: CaisseProduitsComponent },
       { path: "caisse/mes-ventes", component: CaisseMesVentesComponent },
+
+      // ===== Stock (vue d'ensemble + alertes) =====
+      { path: "stock", component: StockComponent },
+
+      // ===== Rapports / Exports (ADMIN/MANAGER) =====
+      { path: "exports", component: ExportsComponent },
       { path: "utilisateur", component: UtilisateursComponent },
       { path: "newutilisateur", component: NewUtilisteurComponent },
       { path: "profile", component: ProfileComponent },
