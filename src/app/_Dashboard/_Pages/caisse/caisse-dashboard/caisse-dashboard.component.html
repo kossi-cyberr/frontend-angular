@@ -143,8 +143,8 @@
             </div>
             <span class="badge badge-error badge-sm">Stock : {{ a.stockReel }} / seuil {{ a.seuilAlerte ?? 0 }}</span>
           </div>
-          <button type="button" class="btn btn-outline btn-sm w-full" *ngIf="articlesSousSeuil.length > 0" (click)="voirProduits()">
-            Voir les produits
+          <button type="button" class="btn btn-outline btn-sm w-full" *ngIf="articlesSousSeuil.length > 0" (click)="voirStock()">
+            Voir le stock
           </button>
         </div>
       </div>

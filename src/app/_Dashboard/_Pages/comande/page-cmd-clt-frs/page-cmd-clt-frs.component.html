@@ -54,10 +54,7 @@
                 <div><i class="fas fa-qrcode blue-color"></i>&nbsp;{{ commande.code }}</div>
                 <div><i class="fas fa-calendar-check blue-color"></i>&nbsp;{{ formaterDate(commande.dateComande) }}</div>
                 <div>
-                  <span class="badge"
-                        [ngClass]="{'badge-warning': commande.etatCommande === 'EN_PREPARATION', 'badge-primary': commande.etatCommande === 'VALIDEE', 'badge-success': commande.etatCommande === 'LIVREE'}">
-                    {{ commande.etatCommande }}
-                  </span>
+                  <app-badge-statut [etat]="commande.etatCommande ?? 'EN_PREPARATION'" [avecPuce]="true"></app-badge-statut>
                 </div>
               </div>
               <div class="col-md-2" *ngIf="estClient">

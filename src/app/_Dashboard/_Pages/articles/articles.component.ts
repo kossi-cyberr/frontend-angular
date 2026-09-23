@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subject, forkJoin } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { Article } from 'src/app/Models/Article';
 import { ArticleService } from 'src/app/services/article.service';
+import { MvtStkService } from 'src/app/services/mvt-stk.service';
 import { ColonneTable } from 'src/app/_Dashboard/components/data-table/data-table.component';
 
 interface ActionTable {
@@ -9,15 +12,21 @@ interface ActionTable {
   ligne: Article;
 }
 
+type EtatStock = 'ok' | 'bas' | 'rupture';
+
 @Component({
   selector: 'app-articles',
   templateUrl: './articles.component.html',
   styleUrls: ['./articles.component.css']
 })
-export class ArticlesComponent implements OnInit {
+export class ArticlesComponent implements OnInit, OnDestroy {
+
+  private detruit$ = new Subject<void>();
 
   articlesList: Article[] = [];
   articlesFiltres: Article[] = [];
+  /** Stock réel par article (calculé depuis les mouvements). */
+  stocksReels: Map<number, number> = new Map<number, number>();
   /** Terme venant de la recherche globale du header (?q=...) */
   termeRecherche = '';
   chargement = true;
@@ -28,6 +37,7 @@ export class ArticlesComponent implements OnInit {
     { cle: 'designation', libelle: 'col.designation', triable: true },
     { cle: 'category.designation', libelle: 'col.categorie', triable: true },
     { cle: 'prixUnitaireTTc', libelle: 'col.prixTtc', triable: true, monnaie: true, droite: true },
+    { cle: 'statut', libelle: 'Statut', statutStock: true },
     { cle: 'seuilAlerte', libelle: 'col.seuil', triable: true, droite: true },
     { cle: 'actions', libelle: 'col.actions', actions: true }
   ];
@@ -39,7 +49,8 @@ export class ArticlesComponent implements OnInit {
 
   constructor(private router: Router,
               private route: ActivatedRoute,
-              private articleService: ArticleService) {}
+              private articleService: ArticleService,
+              private mvtStkService: MvtStkService) {}
 
   ngOnInit(): void {
     // Terme venant de la recherche globale du header (?q=...)
@@ -54,20 +65,52 @@ export class ArticlesComponent implements OnInit {
     this.router.navigate(['newarticles']);
   }
 
+  ngOnDestroy(): void {
+    this.detruit$.next();
+    this.detruit$.complete();
+  }
+
   findAllArticle(): void {
     this.chargement = true;
     this.errorMsg = '';
-    this.articleService.getAllArticles().subscribe(
-      (response: Article[]) => {
-        this.articlesList = response;
-        this.appliquerFiltre();
-        this.chargement = false;
-      },
-      () => {
-        this.errorMsg = 'Erreur lors du chargement des articles.';
-        this.chargement = false;
-      }
-    );
+    forkJoin({
+      articles: this.articleService.getAllArticles(),
+      mvts: this.mvtStkService.findAll()
+    })
+      .pipe(takeUntil(this.detruit$))
+      .subscribe(
+        ({ articles, mvts }) => {
+          const stocks = new Map<number, number>();
+          for (const mvt of mvts) {
+            const id = mvt.article?.id;
+            if (id !== undefined) {
+              stocks.set(id, (stocks.get(id) ?? 0) + Number(mvt.quantite ?? 0));
+            }
+          }
+          this.stocksReels = stocks;
+          this.articlesList = articles;
+          this.appliquerFiltre();
+          this.chargement = false;
+        },
+        () => {
+          this.errorMsg = 'Erreur lors du chargement des articles.';
+          this.chargement = false;
+        }
+      );
+  }
+
+  /** État de stock d'un article (badge 🟢🟠🔴). */
+  etatStock(article: Article): EtatStock {
+    const stock = this.stocksReels.get(article.id ?? -1) ?? 0;
+    if (stock <= 0) {
+      return 'rupture';
+    }
+    return stock <= (article.seuilAlerte ?? 0) ? 'bas' : 'ok';
+  }
+
+  /** Stock réel affichable. */
+  stockDe(article: Article): number {
+    return this.stocksReels.get(article.id ?? -1) ?? 0;
   }
 
   /** Filtre local sur la désignation ou le code (recherche header + filtre instantané) */

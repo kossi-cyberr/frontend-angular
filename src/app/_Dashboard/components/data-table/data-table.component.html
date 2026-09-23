@@ -76,7 +76,15 @@
           <td *ngFor="let colonne of colonnes"
               [class.text-right]="colonne.droite"
               [class.font-medium]="colonne === colonnes[0]">
-            <ng-container *ngIf="!colonne.actions">{{ afficher(ligne, colonne) }}</ng-container>
+            <ng-container *ngIf="!colonne.actions && !colonne.statutStock">{{ afficher(ligne, colonne) }}</ng-container>
+            <ng-container *ngIf="colonne.statutStock && etatStockDe">
+              <span class="badge-statut"
+                    [ngClass]="etatStockDe(ligne) === 'ok' ? 'bg-success/10 text-success' : (etatStockDe(ligne) === 'bas' ? 'bg-warning/10 text-warning' : 'bg-error/10 text-error')">
+                <span class="puce-statut"
+                      [ngClass]="etatStockDe(ligne) === 'ok' ? 'bg-success' : (etatStockDe(ligne) === 'bas' ? 'bg-warning' : 'bg-error')"></span>
+                {{ etatStockDe(ligne) === 'ok' ? 'Stock normal' : (etatStockDe(ligne) === 'bas' ? 'Stock faible' : 'Rupture') }}
+              </span>
+            </ng-container>
             <ng-container *ngIf="colonne.actions">
               <div class="flex justify-end gap-1">
                 <button *ngIf="actionDisponible('details')" type="button" class="btn btn-ghost btn-xs btn-circle" title="Détails"

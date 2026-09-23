@@ -14,6 +14,8 @@ export interface ColonneTable<T> {
   droite?: boolean;
   /** La colonne contient des actions (pas de valeur affichée). */
   actions?: boolean;
+  /** La colonne affiche un badge de statut stock (🟢🟠🔴) calculé par la page. */
+  statutStock?: boolean;
   /** Formateur personnalisé de la cellule (ex. liste de rôles). */
   formateur?: (ligne: T) => string;
   /** Largeur suggérée (classe Tailwind). */
@@ -51,6 +53,9 @@ export class DataTableComponent<T> implements OnChanges {
 
   /** Déclenché au clic sur une action de ligne. */
   @Output() action = new EventEmitter<{ type: 'details' | 'modifier' | 'supprimer'; ligne: T }>();
+
+  /** Calcul de l'état stock d'une ligne (pour les colonnes statutStock). */
+  @Input() etatStockDe?: (ligne: T) => 'ok' | 'bas' | 'rupture';
 
   // --- États d'affichage ---
   @Input() chargement = false;

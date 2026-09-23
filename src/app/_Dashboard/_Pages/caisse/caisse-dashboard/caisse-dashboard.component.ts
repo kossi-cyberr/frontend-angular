@@ -137,6 +137,10 @@ export class CaisseDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/caisse/produits']);
   }
 
+  voirStock(): void {
+    this.router.navigate(['/stock']);
+  }
+
   voirMesVentes(): void {
     this.router.navigate(['/caisse/mes-ventes']);
   }

@@ -43,6 +43,11 @@ export class VentePagedService {
   findAll(): Observable<Ventes[]> {
     return this.httpClient.get<Ventes[]>(`${this.APP_URL}/all`);
   }
+
+  /** Supprime une vente (le stock est restauré côté backend). */
+  enregistrerSuppression(idVente: number): Observable<any> {
+    return this.httpClient.delete(`${this.APP_URL}/delete/${idVente}`);
+  }
 }
 
 /* ------------------------------------------------------------------ */

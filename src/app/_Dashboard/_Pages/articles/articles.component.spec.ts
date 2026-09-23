@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 import { ArticlesComponent } from './articles.component';
 import { ArticleService } from 'src/app/services/article.service';
+import { MvtStkService } from 'src/app/services/mvt-stk.service';
 import { Article } from 'src/app/Models/Article';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -23,12 +24,15 @@ describe('ArticlesComponent', () => {
   beforeEach(async () => {
     articleServiceSpy = jasmine.createSpyObj('ArticleService', ['getAllArticles']);
     articleServiceSpy.getAllArticles.and.returnValue(of(articles));
+    const mvtStkServiceSpy = jasmine.createSpyObj('MvtStkService', ['findAll']);
+    mvtStkServiceSpy.findAll.and.returnValue(of([]));
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
       declarations: [ArticlesComponent],
       providers: [
         { provide: ArticleService, useValue: articleServiceSpy },
+        { provide: MvtStkService, useValue: mvtStkServiceSpy },
         { provide: Router, useValue: routerSpy },
         { provide: ActivatedRoute, useValue: { queryParams: of({}) } }
       ],

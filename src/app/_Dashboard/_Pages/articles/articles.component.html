@@ -25,6 +25,7 @@
   [chargement]="chargement"
   [erreur]="errorMsg !== ''"
   [erreurMessage]="errorMsg || 'Erreur lors du chargement des articles.'"
+  [etatStockDe]="etatStock.bind(this)"
   (creer)="nouvelArticle()"
   (reessayer)="findAllArticle()"
   (action)="surAction($event)">
