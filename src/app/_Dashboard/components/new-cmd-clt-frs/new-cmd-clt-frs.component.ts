@@ -9,6 +9,7 @@ import { LigneCommandeClient } from 'src/app/Models/LigneCommandeClient';
 import { LigneCommandeFournisseur } from 'src/app/Models/LigneCommandeFournisseur';
 import { ArticleService } from 'src/app/services/article.service';
 import { ClientService } from 'src/app/services/client.service';
+import { UserService } from 'src/app/services/user.service';
 import { CommandeClientService } from 'src/app/services/commande-client.service';
 import { CommandeFournisseurService } from 'src/app/services/commande-fournisseur.service';
 import { FournisseurService } from 'src/app/services/fournisseur.service';
@@ -37,6 +38,10 @@ export class NewCmdCltFrsComponent implements OnInit {
   idPartenaireChoisi?: number;
   partenaireChoisi?: Client | Fournisseur;
 
+  /** Création de client à la volée (vendeur). */
+  nouveauClientNom = '';
+  creationClient = false;
+
   /** Ligne en cours de saisie */
   articleRecherche = '';
   articlesSuggeres: Article[] = [];
@@ -49,6 +54,7 @@ export class NewCmdCltFrsComponent implements OnInit {
     private clientService: ClientService,
     private fournisseurService: FournisseurService,
     private articleService: ArticleService,
+    private userService: UserService,
     private commandeClientService: CommandeClientService,
     private commandeFournisseurService: CommandeFournisseurService) { }
 
@@ -70,6 +76,35 @@ export class NewCmdCltFrsComponent implements OnInit {
       this.fournisseurService.findAll().subscribe((fournisseurs: Fournisseur[]) => { this.fournisseurs = fournisseurs; }, () => {});
     }
     this.articleService.getAllArticles().subscribe((articles: Article[]) => { this.articles = articles; }, () => {});
+  }
+
+  /** Crée un client à la volée (nom obligatoire) puis le sélectionne. */
+  creerClientVolee(): void {
+    const nomComplet = this.nouveauClientNom.trim();
+    if (!nomComplet || !this.estClient) {
+      return;
+    }
+    this.creationClient = true;
+    const morceaux = nomComplet.split(/\s+/);
+    const prenom = morceaux.length > 1 ? morceaux[0] : undefined;
+    const nom = morceaux.length > 1 ? morceaux.slice(1).join(' ') : morceaux[0];
+    const client: Client = {
+      nom,
+      prenom,
+      idEntreprise: this.userService.getConnectedUser()?.entreprise?.id
+    };
+    this.clientService.enregistrerClient(client).subscribe(
+      (cree: Client) => {
+        this.creationClient = false;
+        this.nouveauClientNom = '';
+        this.clientService.findAll().subscribe((clients: Client[]) => {
+          this.clients = clients;
+          this.idPartenaireChoisi = cree.id;
+          this.partenaireChoisi = cree;
+        }, () => {});
+      },
+      () => this.creationClient = false
+    );
   }
 
   /** Met à jour le partenaire sélectionné depuis le <select>. */

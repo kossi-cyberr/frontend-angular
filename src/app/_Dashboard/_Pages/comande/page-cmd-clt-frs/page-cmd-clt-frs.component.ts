@@ -4,8 +4,10 @@ import { Observable } from 'rxjs';
 import { CommandeClient } from 'src/app/Models/CommandeClient';
 import { CommandeFournisseur } from 'src/app/Models/CommandeFournisseur';
 import { LigneCommandeClient } from 'src/app/Models/LigneCommandeClient';
+import { Utilisateur } from 'src/app/Models/Utilisateure';
 import { CommandeClientService } from 'src/app/services/commande-client.service';
 import { CommandeFournisseurService } from 'src/app/services/commande-fournisseur.service';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-page-cmd-clt-frs',
@@ -24,20 +26,66 @@ export class PageCmdCltFrsComponent implements OnInit {
   chargement = true;
   errorMsg = '';
 
+  /* Filtres serveur (commandes clients uniquement) */
+  filtreEtat = '';
+  filtreVendeur = '';
+  vendeurs: Utilisateur[] = [];
+
+  /** Ticket d'une commande LIVREE. */
+  commandeTicket: CommandeClient | null = null;
+  ticketOuvert = false;
+
   constructor(private router: Router,
     private activatedRoute: ActivatedRoute,
     private commandeClientService: CommandeClientService,
-    private commandeFournisseurService: CommandeFournisseurService) { }
+    private commandeFournisseurService: CommandeFournisseurService,
+    private userService: UserService) { }
 
   ngOnInit(): void {
     this.activatedRoute.data.subscribe((data: any) => {
       this.origin = data.origin;
       this.findAllCommandes();
+      if (this.origin === 'client') {
+        this.chargerVendeurs();
+      }
     });
   }
 
   get estClient(): boolean {
     return this.origin === 'client';
+  }
+
+  get estVendeur(): boolean {
+    const roles = this.userService.getConnectedUser()?.roles ?? [];
+    return roles.length === 1 && roles[0]?.rolename === 'VENDEUR';
+  }
+
+  /** Liste des vendeurs pour le filtre (masqué aux vendeurs eux-mêmes). */
+  private chargerVendeurs(): void {
+    if (this.estVendeur) {
+      return;
+    }
+    this.userService.findAllUtilisateurs().subscribe(
+      (utilisateurs: Utilisateur[]) => {
+        this.vendeurs = (utilisateurs ?? []).filter(u =>
+          (u.roles ?? []).some(r => r.rolename === 'VENDEUR'));
+      },
+      () => this.vendeurs = []
+    );
+  }
+
+  /** Applique les filtres état + vendeur (commandes clients, côté serveur). */
+  appliquerFiltres(): void {
+    this.findAllCommandes();
+  }
+
+  ouvrirTicket(commande: any): void {
+    this.commandeTicket = commande;
+    this.ticketOuvert = true;
+  }
+
+  nomVendeur(commande: any): string {
+    return commande.nomVendeur || '—';
   }
 
   nouvellecommande(): void {
@@ -47,11 +95,11 @@ export class PageCmdCltFrsComponent implements OnInit {
   findAllCommandes(): void {
     this.chargement = true;
     const requete$ = (this.estClient
-      ? this.commandeClientService.findAll()
+      ? this.commandeClientService.findAllPaged(0, 1000, '', this.filtreEtat, this.filtreVendeur)
       : this.commandeFournisseurService.findAll()) as Observable<any[]>;
     requete$.subscribe(
-      (commandes: any[]) => {
-        this.commandes = commandes;
+      (reponse: any) => {
+        this.commandes = this.estClient ? (reponse.content ?? []) : reponse;
         this.chargement = false;
       },
       (error: any) => {
@@ -60,6 +108,14 @@ export class PageCmdCltFrsComponent implements OnInit {
         this.chargement = false;
       }
     );
+  }
+
+  /** Total d'une commande : montant serveur si présent, sinon calcul local (lignes chargées). */
+  totalAffiche(commande: any): number {
+    if (commande.montantTotal !== undefined && commande.montantTotal !== null) {
+      return Number(commande.montantTotal);
+    }
+    return this.total(commande);
   }
 
   /** Charge les lignes d'une commande au premier déploiement de l'accordéon. */

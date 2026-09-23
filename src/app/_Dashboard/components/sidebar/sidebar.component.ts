@@ -43,6 +43,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
       ]
     },
     {
+      id: 'caisse',
+      cle: 'section.caisse',
+      items: [
+        { id: 'caisse-home', cle: 'nav.caisse', url: 'caisse', icone: 'shopping-cart' },
+        { id: 'caisse-nouvelle', cle: 'nav.nouvelleVente', url: 'caisse/nouvelle-vente', icone: 'receipt' },
+        { id: 'caisse-produits', cle: 'nav.produits', url: 'caisse/produits', icone: 'package' },
+        { id: 'caisse-ventes', cle: 'nav.mesVentes', url: 'caisse/mes-ventes', icone: 'receipt' }
+      ]
+    },
+    {
       id: 'gestion',
       cle: 'section.gestion',
       items: [
@@ -127,15 +137,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
     return this.sections
       .map(section => {
-        if (section.id === 'systeme') {
-          // Vendeur ne voit pas les utilisateurs
+        if (section.id === 'pilotage') {
+          // Vendeur : pas de statistiques d'entreprise
           return {
             ...section,
-            items: section.items.filter(item => item.id !== 'utilisateurs')
+            items: section.items.filter(item => item.id !== 'stats')
           };
         }
         if (section.id === 'gestion') {
-          // Vendeur ne voit pas les fournisseurs ni commandes fournisseurs
+          // Vendeur : pas des fournisseurs ni des commandes fournisseurs
           return {
             ...section,
             items: section.items.filter(item =>

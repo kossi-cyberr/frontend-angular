@@ -7,6 +7,25 @@
       <app-button-action (clickEvent)="nouvellecommande()" [isExporterVisible]="false"></app-button-action>
     </div>
   </div>
+
+  <!-- Filtres (commandes clients uniquement, côté serveur) -->
+  <div class="row m-3" *ngIf="estClient">
+    <div class="col-md-3 mb-2 mb-md-0">
+      <select class="form-control form-control-sm" [(ngModel)]="filtreEtat" (change)="appliquerFiltres()">
+        <option value="">Tous les états</option>
+        <option value="EN_PREPARATION">EN_PREPARATION</option>
+        <option value="VALIDEE">VALIDEE</option>
+        <option value="LIVREE">LIVREE</option>
+      </select>
+    </div>
+    <div class="col-md-3" *ngIf="!estVendeur">
+      <select class="form-control form-control-sm" [(ngModel)]="filtreVendeur" (change)="appliquerFiltres()">
+        <option value="">Tous les vendeurs</option>
+        <option *ngFor="let v of vendeurs" [value]="v.id">{{ v.prenom }} {{ v.nom }}</option>
+      </select>
+    </div>
+  </div>
+
   <div class="col m-3">
     <div class="alert alert-danger" *ngIf="errorMsg">{{ errorMsg }}</div>
     <p class="text-muted" *ngIf="chargement">Chargement…</p>
@@ -41,7 +60,17 @@
                   </span>
                 </div>
               </div>
+              <div class="col-md-2" *ngIf="estClient">
+                <div><i class="fas fa-user-tie blue-color"></i>&nbsp;Vendeur : {{ nomVendeur(commande) }}</div>
+                <div *ngIf="commande.etatCommande === 'LIVREE' && commande.dateLivraison">
+                  <i class="fas fa-truck blue-color"></i>&nbsp;Livrée le {{ formaterDate(commande.dateLivraison) }}
+                </div>
+              </div>
               <div class="col-md-3 text-right">
+                <button type="button" class="btn btn-link" *ngIf="estClient && commande.etatCommande === 'LIVREE'"
+                        (click)="ouvrirTicket(commande); $event.stopPropagation()">
+                  <i class="fas fa-receipt text-primary"></i>&nbsp;Ticket
+                </button>
                 <button type="button" class="btn btn-link" *ngIf="estClient" (click)="telechargerFacture(commande); $event.stopPropagation()">
                   <i class="fas fa-file-pdf text-danger"></i>&nbsp;Facture
                 </button>
@@ -89,7 +118,7 @@
               <h5 class="mb-0">Lignes : {{ (lignesParCommande[commande.id!] || []).length }}</h5>
             </div>
             <div class="col-md-4 text-right">
-              <h5 class="mb-0">Total : {{ total(commande) | number:'1.0-0' }} F</h5>
+              <h5 class="mb-0">Total : {{ totalAffiche(commande) | number:'1.0-0' }} F</h5>
             </div>
           </div>
         </div>
@@ -97,6 +126,9 @@
     </div>
   </div>
 </div>
+
+<!-- Ticket d'une commande livrée -->
+<app-ticket [commande]="commandeTicket" [visible]="ticketOuvert" titre="Facture — commande livrée"></app-ticket>
 
 <!-- Modals de suppression (une par commande) -->
 <div class="modal fade" *ngFor="let commande of commandes"
